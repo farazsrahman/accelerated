@@ -1,0 +1,360 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{mathtools}
+\usepackage{xcolor}
+\usepackage{Shorthands}
+\usepackage{upgreek}
+\usepackage[parfill]{parskip}    		% Activate to begin paragraphs with an empty 
+
+\title{STAT 9912: Acceleration, Greed and Hedging in Optimization} 
+\author{Taught by Dr. Jason Altschuler\\Notes written by Faraz Rahman}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+\newpage
+
+\section{Setting the stage}
+
+Mathematical optimization tackles the set of problems that can be formulated as 
+\begin{align*}
+	\minimize_{\bx} &\quad f(\bx) \\ 
+	\subjectto &\quad x \in \calX
+\end{align*} 
+
+This course aims to study progress in first order optimizers: algorithms that aim to solve the above problem given an oracle that can compute the following given $\bx$
+\begin{enumerate}
+\item $f(\bx)$
+\item $\nabla f(\bx)$
+\end{enumerate}
+The canonical algorithm, gradient descent (GD), is given by the following iterative update rule
+\[\bx_{t+1} = \bx_t -\alpha_t \nabla f(\bx_t)\]
+where $\{\alpha_t\}$ parameterizes different algorithms of GD.
+
+The couse will study gradient descent in various problem settings, along with how choices of $\{\alpha_t\}$ can affect convergence rates, numerical robustness, and \TODO{add desc.}
+% \\\\
+% Things this course will not going to cover:
+% \begin{enumerate}
+% \item Modeling - e.g. Statistical models or ML architecture
+% \item Generalization - Eval'ing $\bx$ on a seperate objective
+% \item Robustness - Robustness
+% \end{enumerate}
+
+
+\section{Foundational Questions about GD}
+
+\begin{enumerate}[label=Q\arabic*)]
+\item Why move in the direction $-\nabla f$
+\item Can GD converge? (with any step size)
+\item How fast? (optimal step size)
+\end{enumerate}
+
+\subsection{Why move in the direction $-\nabla f$}
+
+The gradient descent algorithm, as many other tools in science and engineering, can be derived from solving a linear approximation to the optimization objective.
+
+Writing the first-order Taylor-expansion at $\bx$ we get \[f(\bx+\bv) \approx f(\bx) + \inprod{\nabla f(\bx)}{\bv}\] If we want to use this crude optimization to (try to) move $\bx$ in a direction that reduces $f$, we can setup the following problem.
+\begin{align*} 
+% \minimize_{\bv} &\quad f(\bx+\bv) \approx f(\bx) + \inprod{\nabla f(\bx)}{\bv} \\ 
+\minimize_{\bv} &\quad f(\bx) + \inprod{\nabla f(\bx)}{\bv} \\ 
+\subjectto &\quad \norm{\bv}_2^2 \leq 1
+\end{align*}
+
+In English, this asks: ``If we were only allowed to move one unit away from $\bx$ what direction should we move to decrease $f(\bx)$ the most?".
+
+We will find that \[\bv^* \propto -\nabla f(\bx)\] \TODO{add short derivation here}
+
+A comment should be made that the choice of the $\ell_2$ norm here is not obvious. Different norms will induce different update rules creating a general class of algorithms called methods of steepest descent.
+
+\section{Quadratics}
+
+The simplest place to start our study is in the optimization of convex quadratic functions.
+
+We can consider any function that can be expressed as
+\[f(\bx) = \frac{1}{2}\bx^\top\bH\bx -\bb^\top \bx + c\]
+where $\bH\succeq 0$ (necessary for $f$ to be convex) and $\bH$ is symmetric.\footnote{We can assume $\bH$ is symmetric without loss of generality because if $\bH$ is not symmetric, we can replace it with $\hat \bH = \frac{1}{2}\left(\bH + \bH^\top\right)$, which yields an equivalent function $\hat f$}
+
+
+One assumption we will make is that $m\bI \preceq \bH \preceq M\bI$ where $m, M > 0$ making the $f$ $M$-smooth and $m$-strongly convex. 
+
+This problem has a closed-form optimal solution given by \[\bx^* = \bH^{-1}\bb\] which can be derived via the FOC. This equality will be useful for deriving convergence rates for GD on quadratics.
+
+\subsection{Do we converge?}
+
+Much can be said about GD by studying the difference to between the current solution and the optimal solution \[\bx_{t} - \bx^*\] over time. Intuitively we want the distance to go down... and fast!
+
+Plugging in the update rule we can see how 
+\begin{align*} 
+\p{\bx_{t+1} - \bx^*} = \p{\bx_t - \bx^*} - \alpha_t \nabla f(\bx)
+\end{align*}
+
+Note that
+\begin{align*}
+    \nabla f(\bx) &= \bH\bx_t - \bb \\
+                  &= \bH\bx_t - \bH\bH^{-1}\bb \\
+                  &= \bH\bx_t - \bH\bx^* \\
+                  &= \bH\p{\bx_t -\bx^*}
+\end{align*}
+where the third lines comes from the closed form solution $\bx^* = \bH^{-1}b$.
+
+
+If we plug in this term for $\nabla f(x)$ we get a recurrence
+\begin{align*} 
+\p{\bx_{t+1} - \bx^*} &= \p{\bx_t - \bx^*} - \alpha_t \bH(bx_t - \bx^*) \\
+&= (\bI - \alpha_t \bH)(\bx_t - \bx^*) \\
+\end{align*}
+
+
+This is a Linear Dynamical System (LDS). Recall that an LDS
+\[\bz_{t+1} =\bA\bz_t\] will converge so long as $|\lambda_i| < 1$ for all eigenvalues $\lambda_i$ of $\bA$. \TODO{Check this + add a reference}
+
+Recall that we assumed that $m\bI \preceq \bH \preceq M\bI$, so our dynamics matrix $\bA_t = \p{\bI - \alpha_t \bH}$ we know that the eigenvalues for this dynamical system sit in \[\lambda_i \in [1-\alpha M, 1-\alpha m]\]
+Hence, if set all steps to an adequately chosen $\alpha_t = \alpha$ the above LDS will converge to 0.
+
+
+\subsection{How fast do we converge?}
+
+Before we can answer this question we need to define what it means to converge ``quickly". Consider the metric \[R_T = \frac{\norm{\bx_T - \bx^*}}{\norm{\bx_0 - \bx^*}}\] which captures the fraction of the original distance remaining in our optimization. Naturally we want this as low as possibile. Taking the geometric mean $\p{R_T}^{1/T}$ can tell us about the average contraction rate of our error per optimization step. 
+
+In our analysis we will focus on worst-case analysis over the functions $f$, and random inits $x_0$, so if $\alpha_t = \alpha$ is constant, then it suffices to consider $R_1$. We will start here 
+ 
+
+Consider the following minimax problem where we look for the algorithm (parameetrized by constant step-size $\alpha$) that minimizes the the worst case 1-step contraction rate $R_1$ \[\argmin_{\alpha} \max_{f, \bx_0} R_1:=\frac{\norm{\bx_1 - \bx^*}}{\norm{\bx_0 - \bx^*}}\]
+
+Using the LDS update to expand the numerator,
+\[\argmin_{\alpha} \max_{\bH, \bx_0} \frac{\norm{\p{\bI - \alpha \bH}\p{\bx_0 - \bx^*}}}{\norm{\bx_0 - \bx^*}}\]
+Some may recognize the inner maximization as the matrix norm of $(\bI-\alpha \bH)$. Since $\bH$ is symmetric this is equivalent to the maximum eigenvalue.\footnote{More information on the matrix norm can be found \href{https://math.stackexchange.com/questions/4159983/derivation-of-l2-norm-of-matrix-formula}{here}.} So we can express the minimax as \[\argmin_{\alpha} \max_{\bH} \lambda_{\text{max}}\p{\bI-\alpha \bH} \]
+\TODO{Consider adding some explanation of spectral / matrix norm? I believe the argument to get that all we care about the worst case eigenvalue is see that we can diagonalize $\bH$ as $\bQ\bLambda \bQ^\top$ and so on.}
+
+Since we assumed $m\bI \preceq \bH \preceq M\bI$ what we can further simplify to \[\argmin_{\alpha} \max_{m\leq \lambda\leq M} \abs{1-\alpha\lambda}\]
+
+There is a nice geometric interpretation to this problem. If we think $|1-\alpha \lambda|$ as a linear function, we can think of sweeping the slope of an absolute function pinned at $(0, 1)$.
+
+\begin{center}
+    \includegraphics[width=0.32\textwidth]{static/constant-step-size-visual-too-small}
+    \includegraphics[width=0.32\textwidth]{static/constant-step-size-visual-too-big}
+    \includegraphics[width=0.32\textwidth]{static/constant-step-size-visual-just-right}
+\end{center}
+You can play around with this exact plot on Desmos \href{https://www.desmos.com/calculator/ehnoyh1yen}{here}.
+\TODO{Add some more description for the plots.}
+
+
+
+
+Analytically, since the function is a (peice-wise) linear, we know that the maximum is at either boundary allowing us to write \[\argmin_{\alpha}\max\cb{\abs{1-\alpha m}, \abs{1-\alpha M}}\]
+With arithmetic we can arrive at \[\alpha^* = \frac{2}{M+m}\]
+If we plug this into $R_1$ we get a \textbf{Convergence Rate:} \[R_1 = \frac{M-m}{M+m}=1-\mathcal O\p{\frac{1}{k}}\] \TODO{Define the condition number and write out some more arithmetic for it}
+If we want \textbf{Iteration Complexity} (a.k.a. running time):
+Recall:
+\[error_n \leq R_1^n \cdot error_0\]
+Suppose we want to ask how many iterations need to get $error_n = \eps$ 
+
+i.e. \[R_1^n\leq \eps \Rightarrow n=k\log\p{\frac{1}{\eps}}\]
+
+Note the fact: $1-\delta =$ \TODO{recall the log trick here and write it}
+
+
+
+\subsection{Optimal Schedules}
+
+In the above section, we derived optimal rates for GD when we can pick a single fixed step-size. The natural follow-up is to ask if we can do better with non-constant step-sizes. 
+
+\subsubsection{2 Step Schedules}
+For simplicity, we should start by computing an optimal schedule for $n=2$ steps. The problem will take a familiar form,
+\[\min_{\alpha, \beta}\max_{f, \bx_0\neq \bx^*} \frac{\norm{\bx_2-\bx^*}}{\norm{\bx_0-\bx^*}}\]
+where $\alpha, \beta$ are our step-sizes.
+
+Suppose $R_1^*$ was the optimal one-step contraction. Our hope would be that the extra flexibility of step-size would allow $\sqrt{R_2^*} < R_1^*$.
+
+To analyze this, we can folow very similar steps to above. The two-step error recurrence can be expressed as
+\[\bx_2 -\bx^* = (\bI-\beta \bH)(\bI-\alpha \bH)(\bx_0-\bx^*)\]
+Note that the contraction term is a matrix polynomial of degree $\leq 2$. 
+\TODO{Make sure this logic is clear to a first time reader}.
+\begin{align*}
+p(\bH) &= (\bI - \beta \bH)(\bI - \alpha \bH) \\
+       &= \bI - (\alpha + \beta)\bH + \alpha\beta \bH^2
+\end{align*}
+
+In this expression we see that $p(\zeros)=\bI$. This is analogous to our plot of $y=|1-\alpha\lambda|$ above where the function was pinned $(0, 1)$ at. Since $p$ pinned at $(\zeros, \bI)$ has two degrees of freedom and is parameterized by two step-size choices $\alpha, \beta$, we have a one-to-one mapping with the set $\hat {\calP}_2 = \{p \in \calP_2 : p(\zeros)=\bI\} $. Squinting at $p(\bH)$ in factorized form will tell us that $\alpha, \beta$ are the inverse roots of $p$. Easiest way to see this is we pass a scalar $x$ and get $p(x) = (1-\beta x)(1-\alpha x)$. Setting $p(x)=0$ we get solutions $x \in \{\inv \alpha, \inv \beta\}$.
+
+This lets us write the min of the minimax as
+\[\min_{\text{poly } p \in \hat \calP_2}\max_{m\bI\preceq \bH \preceq M\bI} R_2 = \norm{p(\bH)}\]
+
+Because $\bH$ is symmetric, we may digonalize as $\bH = \bQ\bLambda\bQ^\top$ and extract the orthogonal matrices out of the polynomial to get $p(\bH) = \bQ p(\bLambda)\bQ^\top$. Additionally, matrix-norms are invariant under orthgonal transforms so $||\bQ p(\bLambda)\bQ^\top|| = ||p(\bLambda)||$ meaning that our inner maximization reduces to the worst-case eigenvalue once again.
+\[\min_{p\in\hat \calP_2 }\max_{m\leq \lambda \leq M} 
+\abs{p(\lambda) }\]
+
+In fact, if we expand $p$, this simplified form is an exact generalization of the 1-step picture that we drew above!
+
+\[\min_{\alpha, \beta}\max_{m\leq \lambda \leq M} 
+\abs{1-(\alpha + \beta)\lambda + \alpha\beta \lambda^2} \]
+
+We can plot the polynomial and the maximum value over $[m, M]$ and analyze the worst-case rate. An interactive plot is available \href{https://www.desmos.com/calculator/tsclnvkxdz}{here}.
+
+\begin{center}
+\begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{static/2-step-size-visual-center-too-big.png}\\
+    Center too big
+\end{minipage}
+\hfill
+\begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{static/2-step-size-visual-right-too-big.png}\\
+    Right too big
+\end{minipage}
+\hfill
+\begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{static/2-step-size-visual-just-right.png}\\
+    Just right
+\end{minipage}
+\end{center}
+
+
+\TODO{Add more description here.}
+
+The optimal roots (inverse step-sizes) are shown as the dotted green line at $\cb{\alpha^{-1}, \beta^{-1}} = \cb{\frac{M+m}{2} \pm \frac{M-m}{2\sqrt{2}}}$
+
+\TODO{add derivation of optmial here? in class he just told us with was this}
+
+\subsubsection{The General Case}
+
+
+The general problem $n\geq 2$ steps with step sizes given by $\cb{\alpha_i}_{i\in [n]}$ can be expressed as
+
+\[R_n^* = \min_{\alpha, \beta}\max_{f, \bx_0\neq \bx^*} \frac{\norm{\p{\prod_{i \in [n]} (\bI - \alpha_i \bH)}\p{\bx_0-\bx^*}}}{\norm{\bx_0-\bx^*}}\]
+
+All of the above steps may be repeated to arrive at the form \[\min_{p\in\hat \calP_n }\max_{m\leq \lambda \leq M} 
+\abs{p(\lambda) }\]
+
+This problem is closely related the the Chebyshev Polynomials and the solution the $n$-step problem will turn out to be exactly the $n$th Chebyshev Polynomials $T_n$ (modulo some affine transforms on the input/output). The next section will dive deeper into what the Chebyshev Polynomials, but we will use them here without exposition to analyze some properties of multi-step schedules.
+
+% Optimal polynomial $p^*$ is degree 2 Chebyshev poly with $\cb{\alpha^{-1}, \beta^{-1}} = \cb{\frac{M+m}{2} \pm \frac{M-m}{2\sqrt{2}}}$.
+
+
+% We can repeat all of the above arguments and find that we will get the picking $n$ steps will in general be better than $<n$ steps and the optimal polynomial will in general be a degree $n$ polynomial. Before talking more specifically about Chebyshev polynomials we talk about $p_n^*$ a little more.
+
+% Chebyshev polynomials are defined on $[-1, 1]$ but we are interested in the range of $[m, M]$. Let's assume $L(\lambda)$ is a rescale that takes us to $[-1, 1]$ then we can talk in the language of the Chebyshev polynomials themselves. $T_n$ is the degree $n$ Chebyshev polynomial.
+\TODO{add a one line exposition of Chebyshev Polynomials and $L$}
+
+The solution to the minimax is given by \[p^*_n = \frac{T_n(L(\lambda))}{T_n(L(0))}\] The maximum value that $T_n$ takes on is $1$ so the value of the minimax is \[R^*_n = \frac{1}{T_n(L(0))}\]
+
+We get that \[R_n = \frac{1}{T_n(L(0))} = \dots= \p{\frac{\sqrt{k}-1}{\sqrt{k} + 1}}^n\]
+$\Rightarrow$ \# iterations to get to $R_n \leq \eps$ is $n= \Theta\p{\sqrt{k} \log(1/\eps)}$ 
+
+
+
+\textcolor{red}{\textsc{// TODO: write out the justification for this using big n limit for the ``k" term.}}
+
+
+
+\textbf{Philosophical Aside:}
+
+Why was the optimal steps for $n=2$ suboptimal for $n=1$. 
+
+It means that we have fewer choices to pick from we have to pick something "in-between" to trade off different edge cases ("hedging").
+
+Young 1953. 
+Acceleration Methods FnTML.
+
+
+
+\subsection{The Chebyshev Polynomials and Accelerated Methods}
+
+Some more resources (Mason \& Handscomb, Riulin, Trefethen)
+
+
+\textbf{Various Definitions of Chebyshev Polys:}
+\begin{itemize}
+\item \textbf{Explicit:} \[T_n(z) = \frac{\p{z-\sqrt{z^2-1}}^n + \p{z+\sqrt{z^2-1}}^n}{2}  \]
+\item \textbf{Trigonometric:} \[T_n(z) = \cos(n \cdot \arccos(z)), \quad z\in[-1, 1]\]
+\item \textbf{Roots:} \[\cb{\cos\p{\frac{2t+1}{2n}\pi}}_{t=0 \dots n-1}\]
+	\begin{itemize}
+	\item $\cb{\frac{2t+1}{2n}}_{t=0\dots n-1}$ are pretty angles spread uniformly around the unit circle. So applying $\cos$ can be thought of as projecting the points from the unit circle onto the x-axis. 
+	\item Here is a nice picture for the distribution of roots (uniformly) on a circle then projected on to the x-axis. it is called the arcsine distribution and will come up in random step-size schedules
+	\item \includegraphics[width=400pt]{Pasted image 20251027222540.png}
+	\end{itemize}
+\item \textbf{3-term recurrence} \[T_{n+1}=2zT_n(z) - T_{n-1}(z), \quad T_0(z)=1, T_1(z) = z\]
+\item \textbf{Extremal:} \[T_n(z)/2^{n-1} = \argmin_{p \text{ def } n, p \text{ monic}} \max_{z \in [-1, 1]} \abs{p(z)}\]
+	\begin{itemize}
+	\item This is why they showed up in our step-size derivation above.
+	\end{itemize}
+\end{itemize}
+
+
+A core message to takeaway here is that there are many equivalent ways to derive step-size schedules yielding accelerated descent \textit{and} they all correspond to some way to intuit the Chebyshev polynomials. We can see this because to pick a "next" step size we need to know the "next" root of the $n$ step polynomial. 
+
+To begin we can look at the Polyak Heavy Ball Method / Momentum and the 3-term recurrence.
+
+To get step size for the next step we want, we can grab expand the contraction matrix polynomial using the recursive definition above. If we substitute in $\nabla f (\bx_{n})$ when possible we see that we can recover a momentum looking update rule which uses \textit{both} the current gradient and the previous update to guide the next step: see the simplified form boxed below. The constants $c_1, c_2$ and $c_3$ are left undefined to avoid unnecessary arithmetic.
+\begin{align*}
+\bx_{n+1} - \bx^* &= p_{n+1}(\bH)(\bx_0-\bx^*) \\
+&= \p{\p{c_1+c_2\bH}p_{n}(\bH) - c_3 p_{n-1}(\bH)}(\bx_0-\bx^*)
+\end{align*}
+\includegraphics{Screenshot 2025-10-27 at 8.58.00 PM.png}
+But if you plug 3-term recurrence back into our $\bx_{n+1} -\bx^*= p_{n+1}(\bx_0-\bx^*)$ 
+
+
+Discussion of Conjugate gradients that I kind of missed, but conjugate gradients are based on orthogonal polynomials
+
+\subsection{Random Stepsizes}
+
+Suppose $\alpha_t \sim \mu$ iid. What is the optimal $\mu$ to sample from?
+
+Informally our rate is \[\max_{f, \bx_0 = \bx^*} \frac{\norm{\bx_n-\bx^*}}{\norm{\bx_0 - \bx^*}}\]
+Suppose $\alpha_t \sim \mu$ iid. What is the optimal $\mu$ to sample from? What is the corresponding rate?
+\[R(\mu) = \max_{f, \bx_0} \lim_{n\rightarrow \infty} \E\b{\frac{\norm{\bx_n - \bx^*}}{\norm{\bx_0-\bx^*}}^{1/n}}\]
+
+Observations: rate is invariant w.r.t. ordering of the step-sizes $\cb{\alpha_t}$
+\begin{enumerate}
+\item Optimal deterministic step sizes are the inverse roots of Chebyshev polynomials
+\item Convergence rates depends only on $\hat \mu_n = \frac{1}{n}\sum\delta(\alpha_t)$ (i.e. uniform on the roots)
+\item Intuitively the transform of the uniform on the unit circle is 
+\end{enumerate}
+
+
+\subsection{Solving the Extremal Problem via Potential Theory:}
+
+\begin{itemize}
+\item Step-size Problem (copy paste from above): \[\min_{\gamma} \max_{\lambda \in [m, M]}  \E_{\beta\sim\gamma} \log \abs{1-\frac{\lambda}{\beta}}\]
+
+
+\item Electrostatics Problem:
+
+Consider the following minimization of potentials on a line where the $\log1/\abs{\beta-\alpha}$ kernel defines the energy between particles \[\min_{\gamma \in \calP(m, M)} \E_{\beta, \lambda \sim \gamma} \log\frac{1}{\abs{\beta-\alpha}} \]
+
+\textbf{Fundamental Theorem of Potential Theory:} Characterized uniquely by an equalizing property \[\lambda \mapsto \E \log \p{\frac{1}{\abs{\beta-\alpha}}}\]
+
+In other words a sample from the continuum of points leads to the same log potential no matter where you are on the graph. One way to think about this intuitively is that this is a "stationary" potential since (if we allow particles to move around) there is no place where the potential is higher / lower than where at right now.
+
+Jason provided some intuitive argument for the actual conclusion that arcsine is the optimal $\gamma$ but it was more complex \textcolor{red}{\textsc{// TODO: look deeper into this.}}
+
+\textbf{Connection to perfect hedging:}
+
+\includegraphics[width=400pt]{Screenshot 2025-10-30 at 4.43.11 PM.png}
+
+In the limit of Chebyshev step sizes what ends up happening is that we are "equally" hedged against everything. This means that \textbf{CHEBYSHEV BASED METHODS NEVER DO BETTER} than \[\frac{\sqrt{k} -1}{\sqrt{k} + 1}\]
+
+There is some connection to Green's function that I should learn about: fundamentally, the step size optimum is given by the negative green's function evaluated on $[m, M]^c$ or something like this on the complex plane. \textcolor{red}{\textsc{// TODO: learn more about this}}
+\end{itemize}
+
+\subsection{Understanding the best case scenarios via a two player game}
+\begin{itemize}
+\item Min plays a step-size distribution
+\item Max plays a quadratic function
+\end{itemize}
+
+Game \[ Rate = \inf_{\gamma} \sup_{\lambda \in [m, M]} \E_{\beta \sim\gamma} \log\abs{1-\beta^{-1}\lambda}\]
+To make the game more symmetric we can lift the function player into distribution over $\lambda$s giving \[\inf_{\gamma\in \calP(E)} \sup_{\rho \in \calP(E)} \E_{\beta\sim\gamma, \lambda\sim\rho} \log\abs{1-\beta^{-1}\lambda}\]
+
+\end{document}

@@ -282,7 +282,7 @@ Some more resources (Mason \& Handscomb, Riulin, Trefethen)
 	\begin{itemize}
 	\item $\cb{\frac{2t+1}{2n}}_{t=0\dots n-1}$ are pretty angles spread uniformly around the unit circle. So applying $\cos$ can be thought of as projecting the points from the unit circle onto the x-axis. 
 	\item Here is a nice picture for the distribution of roots (uniformly) on a circle then projected on to the x-axis. it is called the arcsine distribution and will come up in random step-size schedules
-	\item \includegraphics[width=400pt]{Pasted image 20251027222540.png}
+	\item \includegraphics[width=400pt]{static/Pasted image 20251027222540.png}
 	\end{itemize}
 \item \textbf{3-term recurrence} \[T_{n+1}=2zT_n(z) - T_{n-1}(z), \quad T_0(z)=1, T_1(z) = z\]
 \item \textbf{Extremal:} \[T_n(z)/2^{n-1} = \argmin_{p \text{ def } n, p \text{ monic}} \max_{z \in [-1, 1]} \abs{p(z)}\]
@@ -301,7 +301,7 @@ To get step size for the next step we want, we can grab expand the contraction m
 \bx_{n+1} - \bx^* &= p_{n+1}(\bH)(\bx_0-\bx^*) \\
 &= \p{\p{c_1+c_2\bH}p_{n}(\bH) - c_3 p_{n-1}(\bH)}(\bx_0-\bx^*)
 \end{align*}
-\includegraphics{Screenshot 2025-10-27 at 8.58.00 PM.png}
+\includegraphics{static/Screenshot 2025-10-27 at 8.58.00 PM.png}
 But if you plug 3-term recurrence back into our $\bx_{n+1} -\bx^*= p_{n+1}(\bx_0-\bx^*)$ 
 
 
@@ -341,7 +341,7 @@ Jason provided some intuitive argument for the actual conclusion that arcsine is
 
 \textbf{Connection to perfect hedging:}
 
-\includegraphics[width=400pt]{Screenshot 2025-10-30 at 4.43.11 PM.png}
+\includegraphics[width=400pt]{static/Screenshot 2025-10-30 at 4.43.11 PM.png}
 
 In the limit of Chebyshev step sizes what ends up happening is that we are "equally" hedged against everything. This means that \textbf{CHEBYSHEV BASED METHODS NEVER DO BETTER} than \[\frac{\sqrt{k} -1}{\sqrt{k} + 1}\]
 

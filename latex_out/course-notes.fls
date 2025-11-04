@@ -366,23 +366,23 @@ INPUT ./static/2-step-size-visual-just-right.png
 INPUT ./static/2-step-size-visual-just-right.png
 INPUT ./static/2-step-size-visual-just-right.png
 INPUT /usr/local/texlive/2025/texmf-dist/fonts/tfm/jknappen/ec/tcrm1095.tfm
-INPUT ./Pasted image 20251027222540.png
-INPUT ./Pasted image 20251027222540.png
-INPUT ./Pasted image 20251027222540.png
-INPUT ./Pasted image 20251027222540.png
-INPUT ./Pasted image 20251027222540.png
+INPUT ./static/Pasted image 20251027222540.png
+INPUT ./static/Pasted image 20251027222540.png
+INPUT ./static/Pasted image 20251027222540.png
+INPUT ./static/Pasted image 20251027222540.png
+INPUT ./static/Pasted image 20251027222540.png
 INPUT /usr/local/texlive/2025/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc
 INPUT /usr/local/texlive/2025/texmf-dist/fonts/tfm/public/cm/cmti10.tfm
-INPUT ./Screenshot 2025-10-27 at 8.58.00 PM.png
-INPUT ./Screenshot 2025-10-27 at 8.58.00 PM.png
-INPUT ./Screenshot 2025-10-27 at 8.58.00 PM.png
-INPUT ./Screenshot 2025-10-27 at 8.58.00 PM.png
-INPUT ./Screenshot 2025-10-27 at 8.58.00 PM.png
-INPUT ./Screenshot 2025-10-30 at 4.43.11 PM.png
-INPUT ./Screenshot 2025-10-30 at 4.43.11 PM.png
-INPUT ./Screenshot 2025-10-30 at 4.43.11 PM.png
-INPUT ./Screenshot 2025-10-30 at 4.43.11 PM.png
-INPUT ./Screenshot 2025-10-30 at 4.43.11 PM.png
+INPUT ./static/Screenshot 2025-10-27 at 8.58.00 PM.png
+INPUT ./static/Screenshot 2025-10-27 at 8.58.00 PM.png
+INPUT ./static/Screenshot 2025-10-27 at 8.58.00 PM.png
+INPUT ./static/Screenshot 2025-10-27 at 8.58.00 PM.png
+INPUT ./static/Screenshot 2025-10-27 at 8.58.00 PM.png
+INPUT ./static/Screenshot 2025-10-30 at 4.43.11 PM.png
+INPUT ./static/Screenshot 2025-10-30 at 4.43.11 PM.png
+INPUT ./static/Screenshot 2025-10-30 at 4.43.11 PM.png
+INPUT ./static/Screenshot 2025-10-30 at 4.43.11 PM.png
+INPUT ./static/Screenshot 2025-10-30 at 4.43.11 PM.png
 INPUT latex_out/course-notes.aux
 INPUT latex_out/course-notes.out
 INPUT latex_out/course-notes.out

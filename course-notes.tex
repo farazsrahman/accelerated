@@ -343,27 +343,31 @@ We want to study how the geometric mean converges. To do this, we can analyze th
 \subsubsection{Solving the Extremal Problem via Potential Theory:}
 
 \begin{itemize}
-\item Step-size Problem (copy paste from above): \[\min_{\gamma} \max_{\lambda \in [m, M]}  \E_{\beta\sim\gamma} \log \abs{1-\frac{\lambda}{\beta}}\]
+\item Step-size Problem (copy paste from above) but we minimize over the root (inverse-step-size) distribution $\gamma$: \[\min_{\gamma} \max_{\lambda \in [m, M]}  \E_{\beta\sim\gamma} \log \abs{1-\frac{\lambda}{\beta}}\]
 
 
 \item Electrostatics Problem:
 
-Consider the following minimization of potentials on a line where the $\log1/\abs{\beta-\alpha}$ kernel defines the energy between particles \[\min_{\gamma \in \calP(m, M)} \E_{\beta, \lambda \sim \gamma} \log\frac{1}{\abs{\beta-\alpha}} \]
+Consider the following minimization of potentials on a line where the $\log1/\abs{\beta-\alpha}$ kernel defines the energy between particles \[\min_{\gamma \in \calP(m, M)} \E_{\alpha, \beta \sim \gamma} \log\frac{1}{\abs{\beta-\alpha}} \]
+
+\end{itemize}
 
 \textbf{Fundamental Theorem of Potential Theory:} Characterized uniquely by an equalizing property \[\lambda \mapsto \E \log \p{\frac{1}{\abs{\beta-\alpha}}}\]
 
-In other words a sample from the continuum of points leads to the same log potential no matter where you are on the graph. One way to think about this intuitively is that this is a "stationary" potential since (if we allow particles to move around) there is no place where the potential is higher / lower than where at right now.
+In other words, suppose we sample from the continuum of points leading to the same log potential no matter where you are on the graph. One way to think about this intuitively is that this is a ``stationary'' potential since (if we allow particles to move around) there is no place where the potential is higher / lower than where it is in the distribution.
 
-Jason provided some intuitive argument for the actual conclusion that arcsine is the optimal $\gamma$ but it was more complex \textcolor{red}{\textsc{// TODO: look deeper into this.}}
+Jason provided some intuitive argument for the actual conclusion that arcsine is the optimal $\gamma$ but it was more complex \TODO{look deeper into this here is a link from a 
+\href{https://chatgpt.com/s/t_690bce76645c81919b6cb31f3676705e}{Chat} 
+}
 
 \textbf{Connection to perfect hedging:}
 
 \includegraphics[width=400pt]{static/Screenshot 2025-10-30 at 4.43.11 PM.png}
 
-In the limit of Chebyshev step sizes what ends up happening is that we are "equally" hedged against everything. This means that \textbf{CHEBYSHEV BASED METHODS NEVER DO BETTER} than \[\frac{\sqrt{k} -1}{\sqrt{k} + 1}\]
+In the limit of Chebyshev step sizes what ends up happening is that we are ``equally" hedged against everything. This means that \textbf{CHEBYSHEV BASED METHODS NEVER DO BETTER} than \[\frac{\sqrt{k} -1}{\sqrt{k} + 1}\]
 
 There is some connection to Green's function that I should learn about: fundamentally, the step size optimum is given by the negative green's function evaluated on $[m, M]^c$ or something like this on the complex plane. \textcolor{red}{\textsc{// TODO: learn more about this}}
-\end{itemize}
+
 
 \subsection{Understanding the best case scenarios via a two player game}
 \begin{itemize}

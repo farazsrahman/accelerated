@@ -13,7 +13,7 @@
 \usepackage[parfill]{parskip}    		% Activate to begin paragraphs with an empty 
 
 \title{STAT 9912: Acceleration, Greed and Hedging in Optimization} 
-\author{Taught by Dr. Jason Altschuler\\Notes written by Faraz Rahman}
+\author{Taught by Dr. Jason Altschuler \\ Notes written by Faraz Rahman}
 \date{}
 
 \begin{document}
@@ -23,8 +23,8 @@
 \tableofcontents
 \newpage
 
-\section{Setting the stage}
-
+\section{Setting the Stage}
+\subsection{Optimization and Gradient Descent}
 Mathematical optimization tackles the set of problems that can be formulated as 
 \begin{align*}
 	\minimize_{\bx} &\quad f(\bx) \\ 
@@ -36,11 +36,12 @@ This course aims to study progress in first order optimizers: algorithms that ai
 \item $f(\bx)$
 \item $\nabla f(\bx)$
 \end{enumerate}
-The canonical algorithm, gradient descent (GD), is given by the following iterative update rule
-\[\bx_{t+1} = \bx_t -\alpha_t \nabla f(\bx_t)\]
-where $\{\alpha_t\}$ parameterizes different algorithms of GD.
 
-The couse will study gradient descent in various problem settings, along with how choices of $\{\alpha_t\}$ can affect convergence rates, numerical robustness, and \TODO{add desc.}
+The canonical algorithm to solve this problem is Gradient Descent (GD) and is described by the following update
+\[\bx_{t+1} = \bx_t -\alpha_t \nabla f(\bx_t)\]
+where $\{\alpha_t\}$ parameterizes different "schedules" for GD.
+
+These notes will study gradient descent in various problem settings (objective functions), along with how choices for $\{\alpha_t\}$ can affect convergence rates, numerical robustness, and \TODO{add desc.}
 % \\\\
 % Things this course will not going to cover:
 % \begin{enumerate}
@@ -49,16 +50,16 @@ The couse will study gradient descent in various problem settings, along with ho
 % \item Robustness - Robustness
 % \end{enumerate}
 
-
-\section{Foundational Questions about GD}
+Here are some fundamental question about Gradient Descent that we will try to anwer.
 
 \begin{enumerate}[label=Q\arabic*)]
 \item Why move in the direction $-\nabla f$
-\item Can GD converge? (with any step size)
-\item How fast? (optimal step size)
+\item Can GD converge? (with any step sizes)
+\item How fast? (with optimal step sizes)
 \end{enumerate}
 
-\subsection{Why move in the direction $-\nabla f$}
+
+\subsection{Why $-\nabla f$?}
 
 The gradient descent algorithm, as many other tools in science and engineering, can be derived from solving a linear approximation to the optimization objective.
 
@@ -292,7 +293,9 @@ Some more resources (Mason \& Handscomb, Riulin, Trefethen)
 \end{itemize}
 
 
-A core message to takeaway here is that there are many equivalent ways to derive step-size schedules yielding accelerated descent \textit{and} they all correspond to some way to intuit the Chebyshev polynomials. We can see this because to pick a "next" step size we need to know the "next" root of the $n$ step polynomial. 
+A core message to takeaway here is that there are many equivalent ways to derive step-size schedules yielding accelerated descent \textit{and} they all correspond to some way to define the Chebyshev polynomials. This duality follow directly from the relationship between inverse roots and step-sizes. 
+
+\subsubsection{Polyak's Heavy Ball}
 
 To begin we can look at the Polyak Heavy Ball Method / Momentum and the 3-term recurrence.
 
@@ -307,23 +310,37 @@ But if you plug 3-term recurrence back into our $\bx_{n+1} -\bx^*= p_{n+1}(\bx_0
 
 Discussion of Conjugate gradients that I kind of missed, but conjugate gradients are based on orthogonal polynomials
 
-\subsection{Random Stepsizes}
+\subsubsection{Random Stepsizes via Potential Theory}
 
-Suppose $\alpha_t \sim \mu$ iid. What is the optimal $\mu$ to sample from?
+Note that the above derivation for optimal step-sizes \textbf{never} made an assmption on the ordering of step-sizes. Informally,
+as number $n$ steps we are optimizing grows large, taking a random ordering of these step-sizes will be approximately the same as sampling iid from some distribution - that is something like  $\hat \mu_n = \frac{1}{n}\sum_t\delta(\alpha_t)$. The figure \TODO{add Figure names} would suggest to roots (inverse steps sizes) from the arcsine distribution.
 
-Informally our rate is \[\max_{f, \bx_0 = \bx^*} \frac{\norm{\bx_n-\bx^*}}{\norm{\bx_0 - \bx^*}}\]
+Theoretically we may want to ask if we can pose this question as an optimization over sampling distributions and see if we get the same result. Consider the following problem.\footnote{It is tempting to simplify our work by considering the expected contraction over only one-step but the result may be misleading. To see this consider the betting game where everyday you may 2x your wealth or 1/4x it. For a large number of days, do you earn money? \TODO{add result to an appendix, add appendix}}
+
+\TODO{There is a lot more work required to be formal here because of the expectation and limit, but not all of needs to be expressed here. Perhaps I move some of it to the appendix and try to be really formal in that setting? I should provide INTUITION here and reference the appendix for more info}
+
 Suppose $\alpha_t \sim \mu$ iid. What is the optimal $\mu$ to sample from? What is the corresponding rate?
-\[R(\mu) = \max_{f, \bx_0} \lim_{n\rightarrow \infty} \E\b{\frac{\norm{\bx_n - \bx^*}}{\norm{\bx_0-\bx^*}}^{1/n}}\]
-
-Observations: rate is invariant w.r.t. ordering of the step-sizes $\cb{\alpha_t}$
-\begin{enumerate}
-\item Optimal deterministic step sizes are the inverse roots of Chebyshev polynomials
-\item Convergence rates depends only on $\hat \mu_n = \frac{1}{n}\sum\delta(\alpha_t)$ (i.e. uniform on the roots)
-\item Intuitively the transform of the uniform on the unit circle is 
-\end{enumerate}
 
 
-\subsection{Solving the Extremal Problem via Potential Theory:}
+\[R(\mu) = \max_{f, \bx_0} \lim_{n\rightarrow \infty} \E_{\{\alpha_t\} \sim \mu^n}\b{\frac{\norm{\bx_n - \bx^*}}{\norm{\bx_0-\bx^*}}^{1/n}}\]
+
+We should first move this to the matrix norm formulation and diagonalize \TODO{Check what considerations shuold be made because we are doing the matrix norm along side a limit and an expectation}
+
+
+\[R(\mu) = \max_{f} \lim_{n\rightarrow \infty} \E\b{\norm{\prod{\p{\bI-\alpha_t \bLambda}}}^{1/n}}\]
+
+This reduces down to a scalar optimization over the worst case eigenvalue. In the scalar setting we can move the absolute values inside of the product
+
+\[R(\mu) = \max_{\lambda \in [m, M]} \lim_{n\rightarrow \infty} \E\b{\p{\prod{\abs{1- \frac{\lambda}{\beta_t}}}}^{1/n}}\]
+
+
+We want to study how the geometric mean converges. To do this, we can analyze the log one-step contraction rate. In general, if $X_i$ are distributed i.i.d and $G_n := \p{\prod X_i}^{1/n}$ is the geometric mean, then $F_n = \log G_n$ is the arithmetic mean of $\log X_i$. Suppose $\E \log X_i = \mu$, then $F_n \to \mu$ almost surely according to the strong law of large numbers and $G_n \to e^\mu$ almost surely as well.\footnote{See further discussion at \href{https://math.stackexchange.com/questions/1108732/geometric-mean-with-the-law-of-large-numbers}{this Math Stack Exchange post}.} Thus it suffices to study the problem minimizing \TODO{Check this} 
+
+\[\log R(u) = \max_{\lambda\in[m, M]} \E \p{\log\abs{1-\frac{\lambda}{\beta}}}\]
+
+
+
+\subsubsection{Solving the Extremal Problem via Potential Theory:}
 
 \begin{itemize}
 \item Step-size Problem (copy paste from above): \[\min_{\gamma} \max_{\lambda \in [m, M]}  \E_{\beta\sim\gamma} \log \abs{1-\frac{\lambda}{\beta}}\]
